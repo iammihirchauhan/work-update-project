@@ -1,0 +1,251 @@
+{% extends "p1app/base.html" %} 
+
+{% load static %} 
+
+{% block title %}Work Update{% endblock %} 
+
+{% block content %}
+
+<div
+  class="card mb-4 text-white"
+  style="background: linear-gradient(90deg, #0b3c6d, #1e88c9)"
+>
+  <div class="card-body d-flex justify-content-between align-items-center">
+    <div>
+      <h5 class="mt-1">
+        <img src="{% static 'p1app/images/work_update.png' %}" width="25" />
+        Work Update Date
+      </h5>
+      <small>Submit your work update</small>
+    </div>
+
+    <input
+      type="date"
+      class="form-control w-auto"
+      id="work-date"
+      value="2026-01-23"
+    />
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-6">
+    <div id="projects-wrapper">
+      <div class="project-card mb-4">
+        <div class="card">
+          <div
+            class="card-header py-3 text-white fw-semibold"
+            style="background: #446c93"
+          >
+            <div class="d-flex justify-content-between align-items-center">
+              <div class="d-flex align-items-center">
+                <img src="{% static 'p1app/images/project.png' %}" width="22" />
+                <span class="ms-2">Project 1</span>
+              </div>
+
+              <div class="d-flex align-items-center gap-2">
+                <div class="form-check form-switch">
+                  <input
+                    class="form-check-input"
+                    type="checkbox"
+                    id="trackerToggle"
+                    checked
+                  />
+                </div>
+
+                <img
+                  src="{% static 'p1app/images/delete.png' %}"
+                  class="delete-project"
+                  width="18"
+                  style="cursor: pointer"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="card-body">
+            <label class="form-label">Select Project</label>
+            <select class="form-select mb-3">
+              <option>Select a project</option>
+              <option>Project 1</option>
+              <option>Project 2</option>
+            </select>
+
+            <h6 class="fw-semibold">Tasks Breakdown</h6>
+            <div class="d-flex justify-content-between">
+              <div class="form-check mb-3 mt-3">
+                <input class="form-check-input" type="checkbox" />
+                <label class="form-check-label" id="tracker">Tracker Hours</label>
+              </div>
+              <div class="px-5">
+                <input class="form-check-input" type="checkbox" checked />
+                <label class="form-check-label">Hours</label>
+              </div>
+            </div>
+
+            <div id="tasks-container">
+              <div class="task-row d-flex align-items-center gap-2 mb-2">
+                <textarea
+                  class="form-control task-input"
+                  placeholder="Describe task..."
+                  rows="2"
+                ></textarea>
+
+                <input
+                  type="number"
+                  class="form-control w-25"
+                  placeholder="0"
+                />
+                <input
+                  type="number"
+                  class="form-control w-25"
+                  placeholder="0"
+                />
+
+                <button type="button" class="btn btn-danger remove-task">
+                  -
+                </button>
+
+                <button type="button" class="btn btn-success add-task">
+                  +
+                </button>
+              </div>
+            </div>
+
+            <i class="text-muted">Add all tasks you worked on today</i>
+
+            <div class="mt-3">
+              <label class="form-label text-info">Notes</label>
+              <textarea
+                class="form-control"
+                rows="3"
+                placeholder="Enter project notes..."
+              ></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="text-center mt-4">
+      <button
+        class="btn px-4 text-white"
+        style="background: #0b3c6d"
+        id="add-project"
+      >
+        <img
+          src="{% static 'p1app/images/add.png' %}"
+          width="18"
+          class="me-2"
+        />
+        Add Project
+      </button>
+    </div>
+  </div>
+
+  <div class="col-lg-6">{% include "p1app/work_updates/preview.html" %}</div>
+</div>
+
+{% endblock %} {% block script %}
+<script>
+  // date and time
+  function formatDate(dateStr) {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+    });
+  }
+
+  $("#work-date").on("change", function () {
+    const formatted = formatDate($(this).val());
+    $("#preview-date-title, #preview-date-text").text(formatted);
+  });
+
+  // add-task
+  $(document).on("click", ".add-task", function () {
+    const $row = $(this).closest(".task-row");
+    const $clone = $row.clone();
+
+    $clone.find("textarea").val("");
+    $clone.find("input").val("");
+    $clone.find(".remove-task");
+    $row.after($clone);
+  });
+
+  // remove-task
+  $(document).on("click", ".remove-task", function () {
+    if ($(".task-row").length > 1) {
+      $(this).closest(".task-row").remove();
+    }
+  });
+
+  // delete-project
+  $(document).on("click", ".delete-project", function () {
+    $(this).closest(".project-card").remove();
+  });
+
+  // add-project
+  let projectTemplate = $(".project-card").first().clone();
+
+  $("#add-project").on("click", function () {
+    let $project;
+
+    if ($(".project-card").length > 0) {
+      $project = $(".project-card").first().clone();
+    } else {
+      $project = projectTemplate.clone();
+    }
+
+    $project.find("textarea").val("");
+    $project.find("input").val("");
+    $project.find("input#tracker").prop("checked", false);
+    $project.find("input#trackerToggle").prop("checked", true);
+    $project.find("select").prop("selectedIndex", 0);
+    $project.find(".task-row:not(:first)").remove();
+    $project.find(".remove-task").addClass("d-none");
+    $project.find(".remove-task").removeClass("d-none");
+
+    $("#projects-wrapper").append($project);
+  });
+
+  //task updating
+  $(document).on("input", ".task-input", function () {
+    let html = "";
+
+    $(".task-input").each(function () {
+      const val = $(this).val().trim();
+      if (val) {
+        html += `<li>${val}</li>`;
+      }
+    });
+    if (html) {
+      $("#task-heading").show();
+      $("#preview-task-list").html(html);
+    } else {
+      $("#preview-task-list").empty();
+      $("#task-heading").hide();
+    }
+  });
+
+  //select project
+  $(document).on("change", ".form-select", function () {
+    const selectedText = $(this).find("option:selected").text();
+
+    if (selectedText === "Select a project") {
+      $("#preview-project-name").text("Select a project");
+    } else {
+      $("#preview-project-name").text(selectedText);
+    }
+  });
+
+  //copy
+   $("#copy-preview").click(function () {
+    let text = $("#preview-content").text();
+    text = text.replace(/\s+\n/g, "\n").trim();
+    navigator.clipboard.writeText(text);
+});
+
+</script>
+{% endblock %}
