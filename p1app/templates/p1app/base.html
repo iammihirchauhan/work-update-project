@@ -51,7 +51,7 @@
           url: url,
           type: "POST",
           headers: {
-            "X-CSRFToken": $(),
+            "X-CSRFToken": $("#csrf-token"),
           },
         });
       }

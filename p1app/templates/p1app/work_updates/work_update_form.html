@@ -1,10 +1,4 @@
-{% extends "p1app/base.html" %} 
-
-{% load static %} 
-
-{% block title %}Work Update{% endblock %} 
-
-{% block content %}
+{% extends "p1app/base.html" %} {% load static %} {% block title %}Work Update{% endblock %} {% block content %}
 
 <div
   class="card mb-4 text-white"
@@ -75,11 +69,13 @@
             <div class="d-flex justify-content-between">
               <div class="form-check mb-3 mt-3">
                 <input class="form-check-input" type="checkbox" />
-                <label class="form-check-label" id="tracker">Tracker Hours</label>
+                <label class="form-check-label" id="tracker"
+                  >Tracker Hours</label
+                >
               </div>
               <div class="px-5">
                 <input class="form-check-input" type="checkbox" checked />
-                <label class="form-check-label">Hours</label>
+                <label class="form-check-label hours-input">Hours</label>
               </div>
             </div>
 
@@ -89,16 +85,17 @@
                   class="form-control task-input"
                   placeholder="Describe task..."
                   rows="2"
-                ></textarea>
+                >
+                </textarea>
 
                 <input
                   type="number"
-                  class="form-control w-25"
+                  class="form-control w-25 work-hours"
                   placeholder="0"
                 />
                 <input
                   type="number"
-                  class="form-control w-25"
+                  class="form-control w-25 tracher-hours"
                   placeholder="0"
                 />
 
@@ -119,6 +116,7 @@
               <textarea
                 class="form-control"
                 rows="3"
+                id="project-notes"
                 placeholder="Enter project notes..."
               ></textarea>
             </div>
@@ -211,23 +209,30 @@
   });
 
   //task updating
-  $(document).on("input", ".task-input", function () {
-    let html = "";
+  $(document).on(
+    "input",
+    ".task-input, .task-row input[type='number']",
+    function () {
+      let html = "";
 
-    $(".task-input").each(function () {
-      const val = $(this).val().trim();
-      if (val) {
-        html += `<li>${val}</li>`;
+      $(".task-row").each(function () {
+        const task = $(this).find(".task-input").val().trim();
+        const hours = $(this).find(".work-hours").val();
+
+        if (task) {
+          html += `<li>${task} [${hours || 0} hrs]</li>`;
+        }
+      });
+
+      if (html) {
+        $("#task-heading").show();
+        $("#preview-task-list").html(html);
+      } else {
+        $("#preview-task-list").empty();
+        $("#task-heading").hide();
       }
-    });
-    if (html) {
-      $("#task-heading").show();
-      $("#preview-task-list").html(html);
-    } else {
-      $("#preview-task-list").empty();
-      $("#task-heading").hide();
-    }
-  });
+    },
+  );
 
   //select project
   $(document).on("change", ".form-select", function () {
@@ -241,11 +246,23 @@
   });
 
   //copy
-   $("#copy-preview").click(function () {
+  $("#copy-preview").click(function () {
     let text = $("#preview-content").text();
     text = text.replace(/\s+\n/g, "\n").trim();
     navigator.clipboard.writeText(text);
-});
+  });
 
+  //notes
+  $(document).on("input", "#project-notes", function () {
+    const notes = $(this).val().trim();
+
+    if (notes) {
+      $("#preview-notes").text(notes);
+      $("#preview-notes-wrapper").show();
+    } else {
+      $("#preview-notes").empty();
+      $("#preview-notes-wrapper").hide();
+    }
+  });
 </script>
 {% endblock %}
